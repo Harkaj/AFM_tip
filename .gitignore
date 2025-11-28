@@ -1,0 +1,7 @@
+*.o
+*.exe
+*.txt
+*.gp
+
+GNUplot/
+POVRAY/
