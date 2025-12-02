@@ -4,25 +4,26 @@
 #define N 500
 #define PI 3.14159
 #define F0 0.04
-#define Fg 0.0003
+#define Fg 0.000005
 #define Fo 0.005
 #define RR 15
 #define k 0.5
 #define mu 0.02
 #define dt 0.005
+#define STUCK 1
+#define FREE 0
 
 extern int itmax, i_out, create_new, stable_state, it_start;
 extern double c, p, l, S, c_x, c_y, c_y0, c_R, F_c;
 extern double N_x[N], N_y[N], v_x[N], v_y[N], F_x[N], F_y[N], N_c[2], F[2];
+extern int stuck[N];
 
 void Read_file(const char *name, double N_x[], double N_y[]);
 void Create_points(double N_x[], double N_y[], double c);
 int Determine_neighbour(int i, int direction);
-void Collision_correction_floor(double N_y[], double v_y[]);
-double Collision_correction_circle(double N_x[], double N_y[],
-                                    double v_x[], double v_y[],
-                                    double c_x, double c_y, 
-                                    double c_R, double F_y[]);
+double Collision_correction(double N_x[], double N_y[], double v_x[], 
+                            double v_y[], double c_x, double c_y, 
+                            double c_R, double F_x[], double F_y[], int output);
 void Calculate_mass_centre(double N_x[], double N_y[], double N_c[]);
 double Calculate_distance(double x_1, double y_1, double x_2, double y_2);
 double Calculate_vector_angle(double x_1, double y_1, double x_2, double y_2);

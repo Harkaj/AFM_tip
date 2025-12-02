@@ -41,30 +41,27 @@ int Determine_neighbour(int i, int direction)
     else if (direction > 0) { return plus; }
 }
 
-void Collision_correction_floor(double N_y[], double v_y[])
-{
-    for (int i = 0; i < N; i++)
-    {
-        if (N_y[i] < 0.0) 
-        { 
-            N_y[i] = 0.0;
-            v_y[i] = 0.0;
-        }
-    }
-}
-
-double Collision_correction_circle(double N_x[], double N_y[],
-                                    double v_x[], double v_y[], 
-                                    double c_x, double c_y, 
-                                    double c_R, double F_y[])
+double Collision_correction(double N_x[], double N_y[], double v_x[], 
+                            double v_y[], double c_x, double c_y, 
+                            double c_R, double F_x[], double F_y[], int output)
 {
     double dr, phi, result;
 
     result = 0.0;
     for (int i = 0; i < N; i++)
     {
+        if (N_y[i] < 0.0)
+        {
+            N_y[i] = 0.0;
+            F_y[i] = 0.0;
+            v_x[i] = 0.0;
+            v_y[i] = 0.0;
+            stuck[i] = STUCK;
+            continue;
+        }
+
         dr = Calculate_distance(c_x, c_y, N_x[i], N_y[i]);
-        if (dr > c_R + 0.001) { continue; }
+        if (dr > c_R + 0.00002) { stuck[i] = FREE; continue; }
 
         phi = Calculate_vector_angle(c_x, c_y, N_x[i], N_y[i]);
         v_x[i] = 0.0;
@@ -75,14 +72,15 @@ double Collision_correction_circle(double N_x[], double N_y[],
 
         while (dr < c_R)
         {
-            //N_x[i] += 0.0001 * cos(phi);
-            N_y[i] += 0.0001 * sin(phi);
+            if (N_x[i] < c_x && F_x[i] <= 0.0) { N_x[i] -= 0.000002; }
+            else if (F_x[i] > 0.0) { N_x[i] += 0.000002; }
+            
+            N_y[i] -= 0.00002;
             dr = Calculate_distance(c_x, c_y, N_x[i], N_y[i]);
         }
-        
-        result += F_y[i];
-        
-        //if (dr < c_R + 0.001) { result += F_y[i]; }
+        stuck[i] = STUCK;
+        if (output == 0) { result += F_x[i];}
+        else { result += F_y[i]; }
     }
 
     return result;
@@ -235,6 +233,7 @@ double Calculate_next_step(double r[], double v[], double F[])
 {
     for (int i = 0; i < N; i++)
     {
+        if (stuck[i] == STUCK) { continue; }
         v[i] += F[i] * dt;// - 0.01 * abs(v[i]) / v[i];
         r[i] += v[i] * dt;
     }
