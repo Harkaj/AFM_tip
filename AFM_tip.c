@@ -17,10 +17,10 @@ int main(int argc, char** argv[])
     c_x = 0.0;
     c_y0 = 35.0;
     c_y = c_y0;
-    c_R = 5;
-    itmax = 2000000;
+    c_R = 2;
+    itmax = 3000000;
     i_out = 10000;
-    create_new = 1;
+    create_new = 0;
     stable_state = 1;
 
     if (create_new) 
@@ -43,7 +43,7 @@ int main(int argc, char** argv[])
     {
         if (i > it_start && i % 25 == 0 && c_y > 10)
         {
-            c_y -= 0.0001;
+            c_y -= 0.0002;
             if (stable_state) 
             {
                 Text_output(N_x, N_y, F_x, F_y, "Shape_stable.txt");

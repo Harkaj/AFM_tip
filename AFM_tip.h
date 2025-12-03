@@ -4,7 +4,7 @@
 #define N 500
 #define PI 3.14159
 #define F0 0.04
-#define Fg 0.000005
+#define Fg 0.00003
 #define Fo 0.005
 #define RR 15
 #define k 0.5

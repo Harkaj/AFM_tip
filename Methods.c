@@ -50,7 +50,7 @@ double Collision_correction(double N_x[], double N_y[], double v_x[],
     result = 0.0;
     for (int i = 0; i < N; i++)
     {
-        if (N_y[i] < 0.0)
+        if (N_y[i] <= 0.0)
         {
             N_y[i] = 0.0;
             F_y[i] = 0.0;
@@ -61,15 +61,12 @@ double Collision_correction(double N_x[], double N_y[], double v_x[],
         }
 
         dr = Calculate_distance(c_x, c_y, N_x[i], N_y[i]);
-        if (dr > c_R + 0.00002) { stuck[i] = FREE; continue; }
+        if (dr > c_R + 0.00001) { stuck[i] = FREE; continue; }
 
         phi = Calculate_vector_angle(c_x, c_y, N_x[i], N_y[i]);
         v_x[i] = 0.0;
         v_y[i] = 0.0;
         
-        //N_x[i] = c_x + c_R * cos(phi);
-        //N_y[i] = c_y + c_R * sin(phi);
-
         while (dr < c_R)
         {
             if (N_x[i] < c_x && F_x[i] <= 0.0) { N_x[i] -= 0.000002; }
@@ -332,7 +329,7 @@ void GNUplot_output_no_border(char name[], int column1, int column2)
     fprintf(out, "unset xtics\n");
     fprintf(out, "unset ytics\n");
     fprintf(out, "unset key\n");
-    fprintf(out, "plot '%s' using %d:%d with lines, 0 with lines\n", name, column1, column2);
+    fprintf(out, "plot [-25:25] [-1:35] '%s' using %d:%d with lines, 0 with lines\n", name, column1, column2);
 
     fclose(out);
 }
