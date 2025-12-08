@@ -310,7 +310,7 @@ void POVRAY_output(double N_x[], double N_y[], int it, int itmax)
     fclose(out);
 }
 
-void GNUplot_output_no_border(char name[], int column1, int column2)
+void GNUplot_output_no_border(char name[], int column1, int column2, double c_x, double c_y, double c_R)
 {
     char filename[100];
     strcpy(filename, name);
@@ -329,7 +329,31 @@ void GNUplot_output_no_border(char name[], int column1, int column2)
     fprintf(out, "unset xtics\n");
     fprintf(out, "unset ytics\n");
     fprintf(out, "unset key\n");
-    fprintf(out, "plot [-25:25] [-1:35] '%s' using %d:%d with lines, 0 with lines\n", name, column1, column2);
+    fprintf(out, "set object circle at %f,%f size %f fc rgb \"blue\" fs transparent solid noborder\n", c_x, c_y, c_R);
+    fprintf(out, "plot [-25:25] [-1:35] '%s' using %d:%d with lines, 0 with lines", name, column1, column2);
+    
+    fclose(out);
+}
+
+void GNUplot_output_no_border_loop(int column1, int column2)
+{
+    FILE *out;
+    out = fopen("Snapshots/Shape_animation_GNU.gp", "w");
+
+    fprintf(out, "reset\n");
+    fprintf(out, "set terminal png size 800,600 lw 3\n");
+    fprintf(out, "set title 'Liposome shape'\n");
+    fprintf(out, "unset border\n");
+    fprintf(out, "unset xtics\n");
+    fprintf(out, "unset ytics\n");
+    fprintf(out, "unset key\n");
+
+    fprintf(out, "FILES = system(\"ls -1 *.txt\")\n");
+    
+    fprintf(out, "do for [data in FILES] {\n");
+    fprintf(out, "    set output 'GNUplot/'.data.'.png'\n");
+    fprintf(out, "    plot [-25:25] [-1:35] data using %d:%d with lines, 0 with lines", column1, column2);
+    fprintf(out, "}\n");
 
     fclose(out);
 }
@@ -347,12 +371,15 @@ void GNUplot_output_border(char name[], char out_name[], int column1, int column
     fprintf(out, "set terminal png size 800,600 lw 3\n");
     fprintf(out, "set output 'GNUplot/%s.png'\n", out_name);
     fprintf(out, "set title '%s'\n", out_name);
-    fprintf(out, "plot '%s' using %d:%d with points\n", name, column1, column2);
+    fprintf(out, "set fit quiet\n");
+    fprintf(out, "f(x) = a * x + b\n", out_name);
+    fprintf(out, "fit [ ] [0.1:] f(x) '%s' using %d:%d via a, b\n", name, column1, column2);
+    fprintf(out, "plot [ ] [0:] '%s' using %d:%d with points, f(x) with lines\n", name, column1, column2);
 
     fclose(out);
 }
 
-void Text_output(double N_x[], double N_y[], double F_x[], double F_y[], char name[])
+void Text_output(char name[], double N_x[], double N_y[], double F_x[], double F_y[])
 {
     FILE *out;
     out = fopen(name, "w");
@@ -360,8 +387,7 @@ void Text_output(double N_x[], double N_y[], double F_x[], double F_y[], char na
     {
         fprintf(out, "%.6f %.6f %.6f %.6f\n", N_x[i], N_y[i], F_x[i], F_y[i]);
     }
+    fprintf(out, "%.6f %.6f %.6f %.6f\n", N_x[0], N_y[0], F_x[0], F_y[0]);
 
     fclose(out);
-
-    GNUplot_output_no_border(name, 1, 2);
 }

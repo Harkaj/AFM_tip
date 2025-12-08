@@ -35,8 +35,9 @@ void Calculate_total_force(double F_x[], double F_y[], double F[]);
 double Calculate_next_step(double r[], double v[], double F[]);
 void POVRAY_output_ini(int itmax, int i_out);
 void POVRAY_output(double N_x[], double N_y[], int it, int itmax);
-void GNUplot_output_no_border(char name[], int column1, int column2);
+void GNUplot_output_no_border(char name[], int column1, int column2, double c_x, double c_y, double c_R);
+void GNUplot_output_no_border_loop(int column1, int column2);
 void GNUplot_output_border(char name[], char out_name[], int column1, int column2);
-void Text_output(double N_x[], double N_y[], double F_x[], double F_y[], char name[]);
+void Text_output(char name[], double N_x[], double N_y[], double F_x[], double F_y[]);
 
 #endif

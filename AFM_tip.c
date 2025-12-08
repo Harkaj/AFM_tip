@@ -4,10 +4,11 @@
 #include <math.h>
 #include "AFM_tip.h"
 
-int itmax, i_out, create_new, stable_state, it_start;
+int itmax, i_out, create_new, stable_state, it_start, snaps;
 double c, p, l, S, c_x, c_y, c_y0, c_R, F_cx, F_cy;
 double N_x[N], N_y[N], v_x[N], v_y[N], F_x[N], F_y[N], N_c[2], F[2];
 int stuck[N];
+char snap_name[100];
 
 FILE *out;
 
@@ -17,11 +18,12 @@ int main(int argc, char** argv[])
     c_x = 0.0;
     c_y0 = 35.0;
     c_y = c_y0;
-    c_R = 2;
-    itmax = 3000000;
+    c_R = 4;
+    itmax = 2000000;
     i_out = 10000;
     create_new = 0;
     stable_state = 1;
+    snaps = 1;
 
     if (create_new) 
     { 
@@ -39,15 +41,19 @@ int main(int argc, char** argv[])
     out = fopen("Evolution.txt", "w");
     fprintf(out, "i Fx     Fy    S       l      dy_c  F_cx  F_cy\n");
 
+    GNUplot_output_no_border_loop(1, 2);
+    system("rm Snapshots/*.txt");
+
     for (int i = 0; i < itmax; i++)
     {
-        if (i > it_start && i % 25 == 0 && c_y > 10)
+        if (i > it_start && i % 10 == 0 && c_y > 10)
         {
             c_y -= 0.0002;
-            if (stable_state) 
+            if (c_y < 32.0 && i % 10000 == 0) 
             {
-                Text_output(N_x, N_y, F_x, F_y, "Shape_stable.txt");
-                stable_state = 0;
+                sprintf(snap_name, "Snapshots/Shape%d.txt", snaps); 
+                Text_output(snap_name, N_x, N_y, F_x, F_y);
+                snaps++;
             }
         }
 
@@ -82,7 +88,8 @@ int main(int argc, char** argv[])
     fclose(out);
 
     POVRAY_output(N_x, N_y, itmax / i_out, itmax / i_out);
-    Text_output(N_x, N_y, F_x, F_y, "Shape.txt");
+    Text_output("Shape.txt", N_x, N_y, F_x, F_y);
+    GNUplot_output_no_border("Shape.txt", 1, 2, c_x, c_y, c_R);
     GNUplot_output_border("Evolution.txt", "Evolution", 1, 4);
     GNUplot_output_border("Evolution.txt", "Forces", 6, 8);
 

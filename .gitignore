@@ -3,6 +3,7 @@
 *.txt
 *.gp
 *.opj
+*.log
 
 .vscode/
 GNUplot/
