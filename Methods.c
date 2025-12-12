@@ -211,8 +211,30 @@ void Calculate_forces_damped(double N_x[], double N_y[], double v_x[], double v_
     phi_n = Calculate_vector_angle(N_x[im], N_y[im], N_x[ip], N_y[ip]);
     phi_n -= PI / 2.0;
 
-    F_x[i] = k * (d_p * cos(phi_p) + d_m * cos(phi_m)) + (F0 * l * cos(phi_n))/ S - (Fo * cos(phi_n)) - v_x[i] * mu;
-    F_y[i] = k * (d_p * sin(phi_p) + d_m * sin(phi_m)) + (F0 * l * sin(phi_n))/ S - (Fo * sin(phi_n)) - v_y[i] * mu - Fg;
+    F_x[i] = k * (d_p * cos(phi_p) + d_m * cos(phi_m)) + (F0 * l * cos(phi_n))/ (S - Smin) - (Fo * cos(phi_n)) - v_x[i] * mu;
+    F_y[i] = k * (d_p * sin(phi_p) + d_m * sin(phi_m)) + (F0 * l * sin(phi_n))/ (S - Smin) - (Fo * sin(phi_n)) - v_y[i] * mu - Fg;
+}
+
+void Calculate_forces_damped_v2(double N_x[], double N_y[], double v_x[], double v_y[], double F_x[], double F_y[], double S, double l, int i)
+{
+    double d_m, d_p, phi_m, phi_p, phi_n;
+    double result = 0.0;
+
+    int im = Determine_neighbour(i, -1);
+    int ip = Determine_neighbour(i, 1);
+
+    d_m = Calculate_distance(N_x[i], N_y[i], N_x[im], N_y[im]);
+    d_p = Calculate_distance(N_x[i], N_y[i], N_x[ip], N_y[ip]);
+    phi_m = Calculate_vector_angle(N_x[i], N_y[i], N_x[im], N_y[im]);
+    phi_p = Calculate_vector_angle(N_x[i], N_y[i], N_x[ip], N_y[ip]);
+
+    phi_n = Calculate_vector_angle(N_x[im], N_y[im], N_x[ip], N_y[ip]);
+    phi_n -= PI / 2.0;
+
+    F_x[i] = k * l * (d_p * cos(phi_p) + d_m * cos(phi_m)) + (F0 * cos(phi_n))/ S;
+    F_x[i] += -(Fo * cos(phi_n)) - v_x[i] * mu;
+    F_y[i] = k * l * (d_p * sin(phi_p) + d_m * sin(phi_m)) + (F0 * sin(phi_n))/ S;
+    F_y[i] += -(Fo * sin(phi_n)) - v_y[i] * mu - Fg;
 }
 
 void Calculate_total_force(double F_x[], double F_y[], double F[])
@@ -312,7 +334,7 @@ void POVRAY_output(double N_x[], double N_y[], int it, int itmax)
 
 void GNUplot_output_no_border(char name[], int column1, int column2, double c_x, double c_y, double c_R)
 {
-    char filename[100];
+    char filename[150];
     strcpy(filename, name);
     filename[strlen(filename) - 4] = '\0';
     sprintf(filename, "%s_GNU.gp", filename); 
@@ -341,7 +363,7 @@ void GNUplot_output_no_border_loop(int column1, int column2)
     out = fopen("Snapshots/Shape_animation_GNU.gp", "w");
 
     fprintf(out, "reset\n");
-    fprintf(out, "set terminal png size 800,600 lw 3\n");
+    fprintf(out, "set terminal png size 1080,800 lw 3\n");
     fprintf(out, "set title 'Liposome shape'\n");
     fprintf(out, "unset border\n");
     fprintf(out, "unset xtics\n");
@@ -349,9 +371,9 @@ void GNUplot_output_no_border_loop(int column1, int column2)
     fprintf(out, "unset key\n");
 
     fprintf(out, "FILES = system(\"ls -1 *.txt\")\n");
-    
     fprintf(out, "do for [data in FILES] {\n");
-    fprintf(out, "    set output 'GNUplot/'.data.'.png'\n");
+    fprintf(out, "    filename=sprintf(\"GNUplot/%%s.png\",substr(data,0,strlen(data)-4))\n");
+    fprintf(out, "    set output filename\n");
     fprintf(out, "    plot [-25:25] [-1:35] data using %d:%d with lines, 0 with lines", column1, column2);
     fprintf(out, "}\n");
 
@@ -372,9 +394,9 @@ void GNUplot_output_border(char name[], char out_name[], int column1, int column
     fprintf(out, "set output 'GNUplot/%s.png'\n", out_name);
     fprintf(out, "set title '%s'\n", out_name);
     fprintf(out, "set fit quiet\n");
-    fprintf(out, "f(x) = a * x + b\n", out_name);
-    fprintf(out, "fit [ ] [0.1:] f(x) '%s' using %d:%d via a, b\n", name, column1, column2);
-    fprintf(out, "plot [ ] [0:] '%s' using %d:%d with points, f(x) with lines\n", name, column1, column2);
+    fprintf(out, "f(x) = a * x + b\n");
+    fprintf(out, "fit [ ] [0.01:] f(x) '%s' using %d:%d via a, b\n", name, column1, column2);
+    fprintf(out, "plot [ ] [0:] '%s' using %d:%d with lines, f(x) with lines\n", name, column1, column2);
 
     fclose(out);
 }

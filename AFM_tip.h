@@ -3,13 +3,14 @@
 
 #define N 500
 #define PI 3.14159
-#define F0 0.04
+#define F0 0.01
 #define Fg 0.00003
 #define Fo 0.005
+#define Smin 500
 #define RR 15
-#define k 0.5
-#define mu 0.02
-#define dt 0.005
+#define k 1.0
+#define mu 0.1
+#define dt 0.001
 #define STUCK 1
 #define FREE 0
 
@@ -31,6 +32,7 @@ double Calculate_surface_circumference(double N_x[], double N_y[]);
 double Calculate_surface_area(double N_x[], double N_y[]);
 void Calculate_forces(double N_x[], double N_y[], double F_x[], double F_y[], double S, double l, int i);
 void Calculate_forces_damped(double N_x[], double N_y[], double v_x[], double v_y[], double F_x[], double F_y[], double S, double l, int i);
+void Calculate_forces_damped_v2(double N_x[], double N_y[], double v_x[], double v_y[], double F_x[], double F_y[], double S, double l, int i);
 void Calculate_total_force(double F_x[], double F_y[], double F[]);
 double Calculate_next_step(double r[], double v[], double F[]);
 void POVRAY_output_ini(int itmax, int i_out);
